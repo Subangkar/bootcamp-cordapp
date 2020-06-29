@@ -108,6 +108,7 @@ public class ProposalFlow {
 				@Override
 				protected void checkTransaction(SignedTransaction stx) throws FlowException {
 					// Implement responder flow transaction checks here
+
 				}
 			});
 			subFlow(new ReceiveFinalityFlow(otherSide, signedTransaction.getId()));

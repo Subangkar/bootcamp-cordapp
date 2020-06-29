@@ -9,6 +9,8 @@ import net.corda.core.identity.Party;
 import net.corda.core.serialization.ConstructorForDeserialization;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @BelongsToContract(CMContract.class)
@@ -22,6 +24,8 @@ public class CMState implements LinearState {
 	private String dealStatus;
 	private UniqueIdentifier linearId;
 
+	private List<AbstractParty> participants;
+
 	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, String dealStatus) {
 		this.client = client;
 		this.manufacturer = manufacturer;
@@ -31,10 +35,12 @@ public class CMState implements LinearState {
 		this.product = product;
 		this.dealStatus = dealStatus;
 		this.linearId = new UniqueIdentifier();
+
+		participants = new ArrayList<AbstractParty>(Arrays.asList(client, manufacturer));
 	}
 
 	@ConstructorForDeserialization
-	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, String dealStatus, UniqueIdentifier linearId) {
+	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, String dealStatus, UniqueIdentifier linearId, List<AbstractParty> participants) {
 		this.client = client;
 		this.manufacturer = manufacturer;
 		this.auditor = auditor;
@@ -43,6 +49,8 @@ public class CMState implements LinearState {
 		this.product = product;
 		this.dealStatus = dealStatus;
 		this.linearId = linearId;
+
+		this.participants = participants;
 	}
 
 	@NotNull
@@ -54,7 +62,8 @@ public class CMState implements LinearState {
 	@NotNull
 	@Override
 	public List<AbstractParty> getParticipants() {
-		return ImmutableList.of(client, manufacturer);
+//		return ImmutableList.of(client, manufacturer);
+		return participants;
 	}
 
 	public Party getClient() {
@@ -83,5 +92,9 @@ public class CMState implements LinearState {
 
 	public String getDealStatus() {
 		return dealStatus;
+	}
+
+	public void addAuditorAsParticipant() {
+		participants.add(auditor);
 	}
 }

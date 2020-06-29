@@ -17,7 +17,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
@@ -54,9 +58,10 @@ public class AcceptanceFlow {
 			Party client = getOurIdentity();
 			//Creating the output
 			CMState output = new CMState(input.getClient(), input.getManufacturer(), input.getAuditor(), input.getPayment(), input.getQuantity(), input.getProduct(), "Finalized");
+			output.addAuditorAsParticipant();
 
 			CMContract.Commands.Confirm command = new CMContract.Commands.Confirm();
-			List<PublicKey> reqSigners = ImmutableList.of(client.getOwningKey(), input.getManufacturer().getOwningKey());
+			List<PublicKey> reqSigners = ImmutableList.of(client.getOwningKey(), input.getManufacturer().getOwningKey(), input.getAuditor().getOwningKey());
 
 
 			/* ============================================================================
@@ -74,17 +79,22 @@ public class AcceptanceFlow {
 			 * ===========================================================================*/
 			// We check our transaction is valid based on its contracts.
 			transactionBuilder.verify(getServiceHub());
-
-			FlowSession session = initiateFlow(output.getManufacturer());
-
 			// We sign the transaction with our private key, making it immutable.
 			SignedTransaction signedTransaction = getServiceHub().signInitialTransaction(transactionBuilder);
 
-			// The counterparty signs the transaction
-			SignedTransaction fullySignedTransaction = subFlow(new CollectSignaturesFlow(signedTransaction, singletonList(session)));
-
+//			FlowSession session = initiateFlow(output.getManufacturer());
+//
+//			// The counterparty signs the transaction
+//			SignedTransaction fullySignedTransaction = subFlow(new CollectSignaturesFlow(signedTransaction, singletonList(session)));
+//
 			// We get the transaction notarised and recorded automatically by the platform.
-			SignedTransaction finalisedTx = subFlow(new FinalityFlow(fullySignedTransaction, singletonList(session)));
+			List<Party> partyList = new ArrayList();
+			partyList.add(output.getManufacturer());
+			partyList.add(output.getAuditor());
+			Set<FlowSession> sessions = partyList.stream().map(it -> initiateFlow(it)).collect(Collectors.toSet());
+			final SignedTransaction fullySignedTransaction = subFlow(new CollectSignaturesFlow(signedTransaction,
+					sessions, CollectSignaturesFlow.Companion.tracker()));
+			SignedTransaction finalisedTx = subFlow(new FinalityFlow(fullySignedTransaction, sessions));
 			return finalisedTx;
 		}
 	}

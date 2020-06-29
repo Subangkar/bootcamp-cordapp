@@ -30,42 +30,43 @@ public class CMContract implements Contract {
 				return null;
 			});
 		} else if (command.getValue() instanceof Commands.Negotiate) {
-			requireThat( require -> {
-				require.using( "There should be 1 input" , tx.getInputs().size() == 1 );
-				require.using( "Only one output state should be created." , tx.getOutputs().size() == 1 );
-				require.using( "The single input is of type CMState" , tx.inputsOfType( CMState.class ).size() == 1 );
-				require.using( "The single output is of type CMState" , tx.outputsOfType( CMState.class ).size() == 1 );
-				require.using( "There is exactly one command" , tx.getCommands().size() == 1 );
-				CMState input = tx.inputsOfType( CMState.class ).get( 0 );
-				CMState output = tx.outputsOfType( CMState.class ).get( 0 );
-				require.using( "Input must be from a Proposal state" , input.getDealStatus().equals( "Proposal" ) );
-				require.using( "Output must be from a Negotiate state" , output.getDealStatus().equals( "Negotiate" ) );
-				require.using( "The client is unmodified in the output" , input.getClient().equals( output.getClient() ) );
-				require.using( "The manufacturer is unmodified in the output" , input.getManufacturer().equals( output.getManufacturer() ) );
-				require.using( "The auditor is unmodified in the output" , input.getAuditor().equals( output.getAuditor() ) );
+			requireThat(require -> {
+				require.using("There should be 1 input", tx.getInputs().size() == 1);
+				require.using("Only one output state should be created.", tx.getOutputs().size() == 1);
+				require.using("The single input is of type CMState", tx.inputsOfType(CMState.class).size() == 1);
+				require.using("The single output is of type CMState", tx.outputsOfType(CMState.class).size() == 1);
+				require.using("There is exactly one command", tx.getCommands().size() == 1);
+				CMState input = tx.inputsOfType(CMState.class).get(0);
+				CMState output = tx.outputsOfType(CMState.class).get(0);
+				require.using("Input must be from a Proposal state", input.getDealStatus().equals("Proposal"));
+				require.using("Output must be from a Negotiate state", output.getDealStatus().equals("Negotiate"));
+				require.using("The client is unmodified in the output", input.getClient().equals(output.getClient()));
+				require.using("The manufacturer is unmodified in the output", input.getManufacturer().equals(output.getManufacturer()));
+				require.using("The auditor is unmodified in the output", input.getAuditor().equals(output.getAuditor()));
 //				require.using( "The client is a required signer" , command.getSigners().contains( output.getClient().getOwningKey() ) );
-				require.using( "The manufacturer is a required signer" , command.getSigners().contains( output.getManufacturer().getOwningKey() ) );
+				require.using("The manufacturer is a required signer", command.getSigners().contains(output.getManufacturer().getOwningKey()));
 				return null;
-			} );
+			});
 
-//		} else if (command.getValue() instanceof Commands.Confirm) {
-//			requireThat( require -> {
-//				require.using( "There should be 1 input" , tx.getInputs().size() == 1 );
-//				require.using( "Only one output state should be created." , tx.getOutputs().size() == 1 );
-//				require.using( "The single input is of type CMState" , tx.inputsOfType( CMState.class ).size() == 1 );
-//				require.using( "The single output is of type CMState" , tx.outputsOfType( CMState.class ).size() == 1 );
-//				require.using( "There is exactly one command" , tx.getCommands().size() == 1 );
-//				CMState input = tx.inputsOfType( CMState.class ).get( 0 );
-//				CMState output = tx.outputsOfType( CMState.class ).get( 0 );
-//				require.using( "Must be from a Response state" , input.getDealStatus().equals( "Respond" ) );
-//				require.using( "The client is unmodified in the output" , input.getClient().equals( output.getClient() ) );
-//				require.using( "The manufacturer is unmodified in the output" , input.getManufacturer().equals( output.getManufacturer() ) );
-//				require.using( "The auditor is unmodified in the output" , input.getAuditor().equals( output.getAuditor() ) );
-//				require.using( "The client is a required signer" , command.getSigners().contains( output.getClient().getOwningKey() ) );
-//				require.using( "The manufacturer is a required signer" , command.getSigners().contains( output.getManufacturer().getOwningKey() ) );
-//				return null;
-//			} );
-//
+		} else if (command.getValue() instanceof Commands.Confirm) {
+			requireThat(require -> {
+				require.using("There should be 1 input", tx.getInputs().size() == 1);
+				require.using("Only one output state should be created.", tx.getOutputs().size() == 1);
+				require.using("The single input is of type CMState", tx.inputsOfType(CMState.class).size() == 1);
+				require.using("The single output is of type CMState", tx.outputsOfType(CMState.class).size() == 1);
+				require.using("There is exactly one command", tx.getCommands().size() == 1);
+				CMState input = tx.inputsOfType(CMState.class).get(0);
+				CMState output = tx.outputsOfType(CMState.class).get(0);
+				require.using("Input must be from a Negotiate state", input.getDealStatus().equals("Negotiate"));
+				require.using("Output must be from a Finalized state", output.getDealStatus().equals("Finalized"));
+				require.using("The client is unmodified in the output", input.getClient().equals(output.getClient()));
+				require.using("The manufacturer is unmodified in the output", input.getManufacturer().equals(output.getManufacturer()));
+				require.using("The auditor is unmodified in the output", input.getAuditor().equals(output.getAuditor()));
+				require.using("The client is a required signer", command.getSigners().contains(output.getClient().getOwningKey()));
+//				require.using("The manufacturer is a required signer", command.getSigners().contains(output.getManufacturer().getOwningKey()));
+				return null;
+			});
+
 		}
 	}
 

@@ -34,13 +34,14 @@ public class CMState implements LinearState {
 	}
 
 	@ConstructorForDeserialization
-	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, UniqueIdentifier linearId) {
+	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, String dealStatus, UniqueIdentifier linearId) {
 		this.client = client;
 		this.manufacturer = manufacturer;
 		this.auditor = auditor;
 		this.payment = payment;
 		this.quantity = quantity;
 		this.product = product;
+		this.dealStatus = dealStatus;
 		this.linearId = linearId;
 	}
 

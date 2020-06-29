@@ -1,34 +1,34 @@
 package bootcamp;
 
-import net.corda.core.contracts.CommandData;
-import net.corda.core.contracts.CommandWithParties;
-import net.corda.core.contracts.Contract;
+import net.corda.core.contracts.*;
 import net.corda.core.transactions.LedgerTransaction;
-import org.jetbrains.annotations.NotNull;
+
+import java.security.PublicKey;
+import java.util.List;
 
 import static net.corda.core.contracts.ContractsDSL.requireThat;
 
 public class CMContract implements Contract {
 	public static String ID = "bootcamp.CMContract";
 
-	@Override
-	public void verify(@NotNull LedgerTransaction tx) throws IllegalArgumentException {
+	//	@Override
+	public void verify(LedgerTransaction tx) throws IllegalArgumentException {
 //		final CommandWithParties command = tx.getCommands().get( 0 );
-//		if (command.getValue() instanceof Commands.Propose) {
-//			requireThat( require -> {
-//				require.using( "There should be no inputs" , tx.getInputs().isEmpty() );
-//				require.using( "Only one output state should be created." , tx.getOutputs().size() == 1 );
-//				require.using( "The single output is of type CMState" , tx.outputsOfType( CMState.class ).size() == 1 );
-//				require.using( "There is exactly one command" , tx.getCommands().size() == 1 );
-////				require.using("There is no timestamp", tx.getTimeWindow() == null);
-//				CMState output = tx.outputsOfType( CMState.class ).get( 0 );
-////				require.using("The buyer and seller are the proposer and the proposee", ImmutableSet.of(output.getBuyer(), output.getSeller()).equals(ImmutableSet.of(output.getProposee(), output.getProposer())));
-//				require.using( "The client is a required signer" , command.getSigners().contains( output.getClient().getOwningKey() ) );
-//				require.using( "payment can't be -ve" , output.getPayment() > 0 );
-//				require.using( "deal status must be `Proposal`" , output.getDealStatus().equals( "Proposal" ) );
-////				require.using("The proposee is a required signer", command.getSigners().contains(output.getProposee().getOwningKey()));
-//				return null;
-//			} );
+		Command command = tx.getCommand(0);
+		if (command.getValue() instanceof Commands.Propose) {
+			requireThat(require -> {
+				require.using("There should be no inputs", tx.getInputs().isEmpty());
+				require.using("Only one output state should be created.", tx.getOutputs().size() == 1);
+				require.using("The single output is of type CMState", tx.outputsOfType(CMState.class).size() == 1);
+				require.using("There is exactly one command", tx.getCommands().size() == 1);
+//				require.using("There is no timestamp", tx.getTimeWindow() == null);
+				CMState output = tx.outputsOfType(CMState.class).get(0);
+				require.using("The client is a required signer", command.getSigners().contains(output.getClient().getOwningKey()));
+				require.using("payment can't be -ve", output.getPayment() > 0);
+				require.using("quantity can't be -ve", output.getQuantity() > 0);
+				require.using("deal status must be `Proposal`", output.getDealStatus().equals("Proposal"));
+				return null;
+			});
 //		} else if (command.getValue() instanceof Commands.Negotiate) {
 //			requireThat( require -> {
 //				require.using( "There should be 1 input" , tx.getInputs().size() == 1 );
@@ -65,9 +65,7 @@ public class CMContract implements Contract {
 //				return null;
 //			} );
 //
-//		}
-
-		return;
+		}
 	}
 
 	public interface Commands extends CommandData {

@@ -1,6 +1,6 @@
-package bootcamp;
+package bootcamp.states;
 
-import com.google.common.collect.ImmutableList;
+import bootcamp.contracts.OrderContract;
 import net.corda.core.contracts.BelongsToContract;
 import net.corda.core.contracts.LinearState;
 import net.corda.core.contracts.UniqueIdentifier;
@@ -13,44 +13,61 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@BelongsToContract(CMContract.class)
-public class CMState implements LinearState {
+@BelongsToContract(OrderContract.class)
+public class OrderState implements LinearState {
 	private Party client;
 	private Party manufacturer;
-	private Party auditor;
-	private int payment;
+	private Party supplier;
 	private int quantity;
 	private String product;
-	private String dealStatus;
+	private String status;
+	private Party previousHolder;
+	private Party currentHolder;
+
 	private UniqueIdentifier linearId;
 
 	private List<AbstractParty> participants;
 
-	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, String dealStatus) {
+	public OrderState(Party client, Party manufacturer, Party supplier, int quantity, String product, String status, Party previousHolder, Party currentHolder) {
 		this.client = client;
 		this.manufacturer = manufacturer;
-		this.auditor = auditor;
-		this.payment = payment;
+		this.supplier = supplier;
 		this.quantity = quantity;
 		this.product = product;
-		this.dealStatus = dealStatus;
-		this.linearId = new UniqueIdentifier();
-
-		participants = new ArrayList<AbstractParty>(Arrays.asList(client, manufacturer));
+		this.status = status;
+		this.previousHolder = previousHolder;
+		this.currentHolder = currentHolder;
+		this.participants = new ArrayList<AbstractParty>(Arrays.asList(client, manufacturer));
 	}
 
 	@ConstructorForDeserialization
-	public CMState(Party client, Party manufacturer, Party auditor, int payment, int quantity, String product, String dealStatus, UniqueIdentifier linearId, List<AbstractParty> participants) {
+	public OrderState(Party client, Party manufacturer, Party supplier, int quantity, String product, String status, Party previousHolder, Party currentHolder, UniqueIdentifier linearId, List<AbstractParty> participants) {
 		this.client = client;
 		this.manufacturer = manufacturer;
-		this.auditor = auditor;
-		this.payment = payment;
+		this.supplier = supplier;
 		this.quantity = quantity;
 		this.product = product;
-		this.dealStatus = dealStatus;
+		this.status = status;
+		this.previousHolder = previousHolder;
+		this.currentHolder = currentHolder;
 		this.linearId = linearId;
-
 		this.participants = participants;
+	}
+
+	public Party getSupplier() {
+		return supplier;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public Party getPreviousHolder() {
+		return previousHolder;
+	}
+
+	public Party getCurrentHolder() {
+		return currentHolder;
 	}
 
 	@NotNull
@@ -74,14 +91,6 @@ public class CMState implements LinearState {
 		return manufacturer;
 	}
 
-	public Party getAuditor() {
-		return auditor;
-	}
-
-	public int getPayment() {
-		return payment;
-	}
-
 	public int getQuantity() {
 		return quantity;
 	}
@@ -90,11 +99,7 @@ public class CMState implements LinearState {
 		return product;
 	}
 
-	public String getDealStatus() {
-		return dealStatus;
-	}
-
-	public void addAuditorAsParticipant() {
-		participants.add(auditor);
+	public void addAuditorAsParticipant(Party participant, String role) {
+		participants.add(participant);
 	}
 }

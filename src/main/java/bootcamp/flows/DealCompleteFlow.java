@@ -1,5 +1,8 @@
-package bootcamp;
+package bootcamp.flows;
 
+import bootcamp.contracts.CMContract;
+import bootcamp.states.CMState;
+import bootcamp.DealStatus;
 import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
 import net.corda.core.contracts.StateAndRef;
@@ -18,18 +21,15 @@ import org.jetbrains.annotations.NotNull;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singletonList;
-
-public class AcceptanceFlow {
+public class DealCompleteFlow {
 
 	@InitiatingFlow
 	@StartableByRPC
-	public static class Initiator extends FlowLogic<SignedTransaction> {
+	public static class Initiator extends FlowLogic<UniqueIdentifier> {
 
 		private UniqueIdentifier proposalId;
 		private ProgressTracker progressTracker = new ProgressTracker();
@@ -45,7 +45,7 @@ public class AcceptanceFlow {
 
 		@Suspendable
 		@Override
-		public SignedTransaction call() throws FlowException {
+		public UniqueIdentifier call() throws FlowException {
 			QueryCriteria.LinearStateQueryCriteria inputCriteria = new QueryCriteria.LinearStateQueryCriteria(null, ImmutableList.of(proposalId), Vault.StateStatus.UNCONSUMED, null);
 			StateAndRef inputStateAndRef = getServiceHub().getVaultService().queryBy(CMState.class, inputCriteria).getStates().get(0);
 			// We choose our transaction's notary (the notary prevents double-spends).
@@ -55,13 +55,12 @@ public class AcceptanceFlow {
 			/* ============================================================================
 			 *         TODO 1 - update CMState!
 			 * ===========================================================================*/
-			Party client = getOurIdentity();
 			//Creating the output
-			CMState output = new CMState(input.getClient(), input.getManufacturer(), input.getAuditor(), input.getPayment(), input.getQuantity(), input.getProduct(), "Finalized");
+			CMState output = new CMState(input.getClient(), input.getManufacturer(), input.getAuditor(), input.getPayment(), input.getQuantity(), input.getProduct(), DealStatus.COMPLETED.name());
 			output.addAuditorAsParticipant();
 
-			CMContract.Commands.Confirm command = new CMContract.Commands.Confirm();
-			List<PublicKey> reqSigners = ImmutableList.of(client.getOwningKey(), input.getManufacturer().getOwningKey(), input.getAuditor().getOwningKey());
+			CMContract.Commands.Complete command = new CMContract.Commands.Complete();
+			List<PublicKey> reqSigners = ImmutableList.of(input.getClient().getOwningKey(), input.getManufacturer().getOwningKey(), input.getAuditor().getOwningKey());
 
 
 			/* ============================================================================
@@ -82,11 +81,6 @@ public class AcceptanceFlow {
 			// We sign the transaction with our private key, making it immutable.
 			SignedTransaction signedTransaction = getServiceHub().signInitialTransaction(transactionBuilder);
 
-//			FlowSession session = initiateFlow(output.getManufacturer());
-//
-//			// The counterparty signs the transaction
-//			SignedTransaction fullySignedTransaction = subFlow(new CollectSignaturesFlow(signedTransaction, singletonList(session)));
-//
 			// We get the transaction notarised and recorded automatically by the platform.
 			List<Party> partyList = new ArrayList();
 			partyList.add(output.getManufacturer());
@@ -95,7 +89,7 @@ public class AcceptanceFlow {
 			final SignedTransaction fullySignedTransaction = subFlow(new CollectSignaturesFlow(signedTransaction,
 					sessions, CollectSignaturesFlow.Companion.tracker()));
 			SignedTransaction finalisedTx = subFlow(new FinalityFlow(fullySignedTransaction, sessions));
-			return finalisedTx;
+			return finalisedTx.getTx().outputsOfType(CMState.class).get(0).getLinearId();
 		}
 	}
 
@@ -118,12 +112,11 @@ public class AcceptanceFlow {
 						LedgerTransaction ledgerTx = stx.toLedgerTransaction(getServiceHub(), false);
 						Party client = ledgerTx.inputsOfType(CMState.class).get(0).getClient();
 						if (!client.equals(otherSide.getCounterparty())) {
-							throw new FlowException("Only the client can accept a proposal.");
+							throw new FlowException("Only the client can complete the deal.");
 						}
 					} catch (SignatureException e) {
 						throw new FlowException("Check transaction failed");
 					}
-
 
 				}
 			};

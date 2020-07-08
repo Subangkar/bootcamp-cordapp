@@ -56,7 +56,7 @@ public class ProposalFlow {
 			/* ============================================================================
 			 *         TODO 1 - Create CMState to represent on-ledger cm!
 			 * ===========================================================================*/
-			// We create our new TokenState.
+			// We create new OrderState.
 			CMState output = new CMState(client, manufacturer, auditor, payment, quantity, product, DealStatus.PROPOSAL.name());
 			CMContract.Commands.Propose command = new CMContract.Commands.Propose();
 			List<PublicKey> reqSigners = ImmutableList.of(client.getOwningKey(), manufacturer.getOwningKey());

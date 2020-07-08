@@ -106,7 +106,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         projectCordapp { deploy = true }
     }
     node {
-        name "O=Notary,L=London,C=GB"
+        name "O=Notary,L=Dhaka,C=BD"
         notary = [validating: false]
         p2pPort 10000
         cordapps = []
@@ -116,39 +116,43 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         }
     }
     node {
-        name "O=Client,L=London,C=GB"
+        name "O=Gucci,L=London,C=GB"
         p2pPort 10003
         rpcSettings {
             address("localhost:10004")
             adminAddress("localhost:10005")
         }
+//        webPort 11003
         rpcUsers = [[user: "user1", password: "test", permissions: ["ALL"]]]
     }
     node {
-        name "O=Manufacturer,L=New York,C=US"
+        name "O=StandardGarments,L=Dhaka,C=BD"
         p2pPort 10006
         rpcSettings {
             address("localhost:10007")
             adminAddress("localhost:10008")
         }
+//        webPort 11006
         rpcUsers = [[user: "user1", password: "test", permissions: ["ALL"]]]
     }
+//    node {
+//        name "O=Supplier,L=Lagos,C=NG"
+//        p2pPort 10009
+//        rpcSettings {
+//            address("localhost:10010")
+//            adminAddress("localhost:10011")
+//        }
+//        webPort 11009
+//        rpcUsers = [[user: "user1", password: "test", permissions: ["ALL"]]]
+//    }
     node {
-        name "O=Supplier,L=Lagos,C=NG"
-        p2pPort 10009
-        rpcSettings {
-            address("localhost:10010")
-            adminAddress("localhost:10011")
-        }
-        rpcUsers = [[user: "user1", password: "test", permissions: ["ALL"]]]
-    }
-    node {
-        name "O=Auditor,L=Lagos,C=NG"
+        name "O=KAAuditFarm,L=Dhaka,C=BD"
         p2pPort 10012
         rpcSettings {
             address("localhost:10013")
             adminAddress("localhost:10014")
         }
+//        webPort 11012
         rpcUsers = [[user: "user1", password: "test", permissions: ["ALL"]]]
     }
 }
